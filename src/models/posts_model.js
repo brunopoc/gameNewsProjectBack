@@ -13,17 +13,14 @@ const schema = new Schema({
     },
     author: {
         type: String,
-        required: true,
         trim: true
     },
     postType: {
         type: String,
-        required: true,
         trim: true
     },
     categories: [{
         type: String,
-        required: true,
         trim: true
     }],
     tags: [{
@@ -40,7 +37,6 @@ const schema = new Schema({
     },
     postSchedule: [{
         type: String,
-        required: true,
         trim: true
     }]
 });
