@@ -11,11 +11,26 @@ const schema = new Schema({
         type: String,
         required: true
     },
+    resume: {
+        type: String,
+    },
+    likes: {
+        type: Number,
+    },
+    commentsCount: {
+        type: Number,
+    },
     author: {
+        name: { 
+            type: String,
+            trim: true
+        }
+    },
+    postType: {
         type: String,
         trim: true
     },
-    postType: {
+    image: {
         type: String,
         trim: true
     },

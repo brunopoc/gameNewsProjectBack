@@ -2,15 +2,22 @@
 const mongoose = require('mongoose');
 const Posts = mongoose.model('Posts');
 
-exports.get = (req, res, next) => {
-    Posts
-    .find({}, 'id title')
-    .then(data => {
-        res.status(200).send(data);
-    })
-    .catch(e => {
-        res.status(400).send({message: "Falha ao listar as postagens", data: e});
-    });;
+exports.get = async (req, res, next) => {
+    const resPerPage = 9; 
+    const page = req.params.page || 1;
+    try {
+        const foundPosts = await Posts.find()
+            .skip((resPerPage * page) - resPerPage)
+            .limit(resPerPage);
+        const numOfPosts = await Posts.count();
+        res.status(200).send({
+            list: foundPosts,
+            totalOfPages: numOfPosts,
+            currentPage: page
+        });
+    } catch (err) {
+        res.status(400).send({message: "Falha ao carregar as postagens", data: err});
+    }
 };
 
 exports.getOne = (req, res, next) => {
@@ -29,10 +36,10 @@ exports.post = (req, res, next) => {
     posts
     .save()
     .then(data => {
-        res.status(201).send({message: "Postagem cadastrado com sucesso!"});
+        res.status(201).send({status: "Success"});
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao cadastrar uma postagem", data: e});
+        res.status(400).send({status: "Error", data: e});
     });
 };
 
