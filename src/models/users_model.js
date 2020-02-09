@@ -18,6 +18,23 @@ const schema = new Schema({
         type: String,
         required: true,
         trim: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    type: {
+        type: String,
+        trim: true,
+        default: "user"
+    },
+    blocked: {
+        type: Boolean,
+        default: false
+    },
+    checkedProfile: {
+        type: Boolean,
+        default: false
     }
 });
 

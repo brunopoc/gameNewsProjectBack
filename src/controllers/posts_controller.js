@@ -37,10 +37,10 @@ exports.post = (req, res, next) => {
 };
 
 exports.postFile = (req, res, next) => {
-        res.json({
-          uploaded: true,
-          url: `${process.env.BASE_URL}/${req.file.filename}`
-        });
+    res.json({
+        uploaded: true,
+        url: `http://localhost:4000/files/${req.file.filename}`
+    });
 };
 
 exports.put = async (req, res, next) => {
