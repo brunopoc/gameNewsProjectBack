@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const md5 = require('md5');
 const emailService = require('../services/email-service');
-const { generateToken } = require('../services/utils/token.utils');
+const { generateToken, decodeToken } = require('../services/utils/token.utils');
 
 exports.get = (req, res, next) => {
     User
@@ -47,12 +47,12 @@ exports.login = async (req, res, next) => {
         email: req.body.email,
         password: md5(req.body.password + global.SALT_KEY)
     })
-    .then(async ({_id: id, name, email}) => {
+    .then(async ({_id: id, name, email, type}) => {
         if(!id) {   
              res.status(400).send({message: "Usuario ou senha invalidos"});           
         }
         const token = await generateToken({
-            email, name, id
+            email, name, id, type
         });
         res.status(200).send({
             token,
@@ -63,7 +63,34 @@ exports.login = async (req, res, next) => {
         
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao listar os usuarios", data: e});
+        res.status(400).send({message: "Falha ao logar o usuario", data: e});
+    });;
+};
+
+exports.myuser = async (req, res, next) => {
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    const data = await decodeToken(token);
+    User
+    .findOne({
+        email: data.email,
+    })
+    .then(async ({_id: id, name, email, type}) => {
+        if(!id) {   
+             res.status(400).send({message: "Usuario não encontrado"});           
+        }
+        const token = await generateToken({
+            email, name, id, type
+        });
+        res.status(200).send({
+            token,
+            data: {
+                email, name
+            }
+        });
+        
+    })
+    .catch(e => {
+        res.status(400).send({message: "Falha ao listar o usuario", data: e});
     });;
 };
 

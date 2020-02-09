@@ -1,9 +1,6 @@
 'use strict'
 const mongoose = require('mongoose');
 const Posts = mongoose.model('Posts');
-const md5 = require('md5');
-const emailService = require('../services/email-service');
-const authService = require('../services/auth-service');
 
 exports.get = (req, res, next) => {
     Posts
@@ -23,7 +20,7 @@ exports.getOne = (req, res, next) => {
         res.status(200).send(data);
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao listar os usuarios", data: e});
+        res.status(400).send({message: "Falha ao listar as postagens", data: e});
     });;
 };
 
@@ -36,6 +33,13 @@ exports.post = (req, res, next) => {
     })
     .catch(e => {
         res.status(400).send({message: "Falha ao cadastrar uma postagem", data: e});
+    });
+};
+
+exports.postFile = (req, res, next) => {
+    res.json({
+        uploaded: true,
+        url: `http://localhost:4000/files/${req.file.filename}`
     });
 };
 

@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const config = require('./config');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require("path");
 
 const User = require('./models/users_model');
 const Posts = require('./models/posts_model');
@@ -33,6 +34,11 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send();
 });
+
+app.use(
+  "/files",
+  express.static(path.resolve(__dirname, "..", "tmp", "uploads"))
+);
 
 const indexRoutes = require('./routes/index_routes');
 const usersRoutes = require('./routes/users_routes');
