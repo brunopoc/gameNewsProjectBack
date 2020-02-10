@@ -1,6 +1,7 @@
 'use strict'
 const mongoose = require('mongoose');
 const Posts = mongoose.model('Posts');
+const Categories = mongoose.model('Categories');
 const stripHtml = require("string-strip-html");
 
 exports.get = async (req, res, next) => {
@@ -12,9 +13,10 @@ exports.get = async (req, res, next) => {
             .limit(resPerPage)
             .sort({createdAt:-1}) ;
         const numOfPosts = await Posts.count();
+        const totalOfPages = numOfPosts / 9;
         res.status(200).send({
             list: foundPosts,
-            totalOfPages: numOfPosts,
+            totalOfPages: totalOfPages,
             currentPage: page
         });
     } catch (err) {
@@ -45,6 +47,31 @@ exports.post = (req, res, next) => {
     .catch(e => {
         res.status(400).send({status: "Error", data: e});
     });
+};
+
+exports.addCategorie = (req, res, next) => {
+    const categorie = req.body;
+    let category = new Categories({ ...categorie });
+    category
+    .save()
+    .then(data => {
+        res.status(201).send({status: "Success"});
+    })
+    .catch(e => {
+        res.status(400).send({status: "Error", data: e});
+    });
+};
+
+exports.getCategories = async (req, res, next) => {
+    Categories
+    .find()
+    .then(data => {
+        const filteredData = data.map(item => {return {label: item.title, value: item._id}})
+        res.status(200).send(filteredData);
+    })
+    .catch(e => {
+        res.status(400).send({message: "Falha ao listar os usuarios", data: e});
+    });;
 };
 
 exports.postFile = (req, res, next) => {

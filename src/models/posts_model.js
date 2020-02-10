@@ -47,12 +47,24 @@ const schema = new Schema({
         trim: true
     },
     categories: [{
-        type: String,
-        trim: true
+        label: {
+            type: String,
+            trim: true
+        },
+        value: {
+            type: String,
+            trim: true
+        }
     }],
     tags: [{
-        type: String,
-        trim: true
+        label: {
+            type: String,
+            trim: true
+        },
+        value: {
+            type: String,
+            trim: true
+        }
     }],
     createdAt: {
         type: Date,
