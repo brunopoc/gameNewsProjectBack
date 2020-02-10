@@ -1,6 +1,7 @@
 'use strict'
 const mongoose = require('mongoose');
 const Posts = mongoose.model('Posts');
+const stripHtml = require("string-strip-html");
 
 exports.get = async (req, res, next) => {
     const resPerPage = 9; 
@@ -8,7 +9,8 @@ exports.get = async (req, res, next) => {
     try {
         const foundPosts = await Posts.find()
             .skip((resPerPage * page) - resPerPage)
-            .limit(resPerPage);
+            .limit(resPerPage)
+            .sort({createdAt:-1}) ;
         const numOfPosts = await Posts.count();
         res.status(200).send({
             list: foundPosts,
@@ -32,7 +34,9 @@ exports.getOne = (req, res, next) => {
 };
 
 exports.post = (req, res, next) => {
-    let posts = new Posts(req.body);
+    const article = req.body;
+    const resume = stripHtml(req.body.content.match(/.{1,200}/g)[0].trim().concat(" ..."));
+    let posts = new Posts({ ...article, resume});
     posts
     .save()
     .then(data => {
@@ -44,9 +48,10 @@ exports.post = (req, res, next) => {
 };
 
 exports.postFile = (req, res, next) => {
+    const name = req.file.filename || req.file.name;
     res.json({
         uploaded: true,
-        url: `http://localhost:4000/files/${req.file.filename}`
+        url: `http://localhost:4000/files/${name}`
     });
 };
 

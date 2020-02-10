@@ -30,6 +30,7 @@
     "passport-facebook-token": "^3.3.0",
     "request": "^2.88.0",
     "sendgrid": "^5.2.3",
+    "string-strip-html": "^4.3.16",
     "utils": "^0.3.1"
   },
   "devDependencies": {

@@ -16,10 +16,22 @@ const schema = new Schema({
     },
     likes: {
         type: Number,
+        default: 0
     },
-    commentsCount: {
-        type: Number,
-    },
+    comments: [{
+        text: { 
+            type: String,
+            trim: true 
+        },
+        commentedAt: {
+            type: Date,
+            default: Date.now
+        },
+        author: {
+            type: String,
+            trim: true
+        }
+    }],
     author: {
         name: { 
             type: String,
