@@ -11,21 +11,60 @@ const schema = new Schema({
         type: String,
         required: true
     },
-    author: {
+    resume: {
         type: String,
-        trim: true
+    },
+    likes: {
+        type: Number,
+        default: 0
+    },
+    comments: [{
+        text: { 
+            type: String,
+            trim: true 
+        },
+        commentedAt: {
+            type: Date,
+            default: Date.now
+        },
+        author: {
+            type: String,
+            trim: true
+        }
+    }],
+    author: {
+        name: { 
+            type: String,
+            trim: true
+        }
     },
     postType: {
         type: String,
         trim: true
     },
-    categories: [{
+    image: {
         type: String,
         trim: true
+    },
+    categories: [{
+        label: {
+            type: String,
+            trim: true
+        },
+        value: {
+            type: String,
+            trim: true
+        }
     }],
     tags: [{
-        type: String,
-        trim: true
+        label: {
+            type: String,
+            trim: true
+        },
+        value: {
+            type: String,
+            trim: true
+        }
     }],
     createdAt: {
         type: Date,

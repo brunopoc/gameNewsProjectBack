@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const path = require("path");
 
 const User = require('./models/users_model');
+const Categories = require('./models/categories_model');
 const Posts = require('./models/posts_model');
 
 mongoose.connect(config.connectionString, {useNewUrlParser: true});
