@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Posts = mongoose.model('Posts');
 const Categories = mongoose.model('Categories');
 const stripHtml = require("string-strip-html");
+const format = require('../services/utils/format');
 
 exports.get = async (req, res, next) => {
     const resPerPage = 9; 
@@ -26,19 +27,20 @@ exports.get = async (req, res, next) => {
 
 exports.getOne = (req, res, next) => {
     Posts
-    .findOne({id: req.body.id}, 'title text post_type images_url post_schedule')
+    .findOne({refer: req.params.refer})
     .then(data => {
         res.status(200).send(data);
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao listar as postagens", data: e});
+        res.status(400).send({message: "Falha ao carregar a postagem", data: e});
     });;
 };
 
 exports.post = (req, res, next) => {
     const article = req.body;
+    const refer = format.convertToSlug(article.title);
     const resume = stripHtml(req.body.content.match(/.{1,200}/g)[0].trim().concat(" ..."));
-    let posts = new Posts({ ...article, resume});
+    let posts = new Posts({ ...article, resume, refer});
     posts
     .save()
     .then(data => {
