@@ -13,6 +13,7 @@ router.post('/posts/', authService.authorize, postsController.post);
 router.post('/posts/addCategorie', authService.authorize, postsController.addCategorie);
 router.get('/posts/listCategories', authService.authorize, postsController.getCategories);
 router.get('/posts/article/:refer', postsController.getOne);
-router.put('/posts/:id', authService.authorize, postsController.put);
+router.post('/posts/like/:id', authService.authorize, postsController.updateLikes);
+router.post('/posts/comment/:id', authService.authorize, postsController.postComment);
 
 module.exports = router;

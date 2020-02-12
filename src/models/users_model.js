@@ -35,7 +35,12 @@ const schema = new Schema({
     checkedProfile: {
         type: Boolean,
         default: false
-    }
+    },
+    likedPosts: [{
+        id: {
+            type: String
+        }
+    }]
 });
 
 schema.set('toJSON', {getters: true, virtuals: true});
