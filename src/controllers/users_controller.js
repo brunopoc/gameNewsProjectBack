@@ -101,8 +101,8 @@ exports.updateLikedPosts = async (req, res, next) => {
         $set: {
             likedPosts
         }
-    })
-    .then(async ({ name, email}) => {
+    }, {new: true})
+    .then(async ({ name, email, likedPosts}) => {
         res.status(200).send({
             data: {
                 email, name, id, likedPosts

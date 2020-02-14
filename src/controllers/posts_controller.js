@@ -6,7 +6,7 @@ const stripHtml = require("string-strip-html");
 const format = require("../services/utils/format");
 
 exports.get = async (req, res, next) => {
-  const resPerPage = 9;
+  const resPerPage = 8;
   const page = req.params.page || 1;
   try {
     const foundPosts = await Posts.find()
@@ -14,7 +14,7 @@ exports.get = async (req, res, next) => {
       .limit(resPerPage)
       .sort({ createdAt: -1 });
     const numOfPosts = await Posts.count();
-    const totalOfPages = numOfPosts / 9;
+    const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
       totalOfPages: totalOfPages,
@@ -97,12 +97,13 @@ exports.updateLikes = async (req, res, next) => {
   const id = req.params.id;
   const action = req.body.action;
   const counter = action === "Liked" ? 1 : -1;
-  Posts.findByIdAndUpdate(id, { $inc: { likes: counter } })
+  console.log(action);
+  console.log(counter);
+  Posts.findByIdAndUpdate(id, { $inc: { likes: counter } }, {new: true})
     .then(async ({ likes, _id }) => {
-      const likesRef = likes + counter;
       res.status(200).send({
         _id,
-        likes: likesRef
+        likes
       });
     })
     .catch(e => {
@@ -112,12 +113,12 @@ exports.updateLikes = async (req, res, next) => {
 
 exports.postComment = async (req, res, next) => {
   const id = req.params.id;
-  const comments = req.body;
-  Posts.findByIdAndUpdate(id, { comments })
-    .then(async ({ _id }) => {
+  const commentsData = req.body;
+  Posts.findByIdAndUpdate(id, { comments: commentsData }, {new: true})
+    .then(async ({ _id, comments }) => {
       res.status(200).send({
         _id,
-        ...comments
+        comments
       });
     })
     .catch(e => {

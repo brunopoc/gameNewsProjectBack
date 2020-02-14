@@ -37,9 +37,7 @@ const schema = new Schema({
         default: false
     },
     likedPosts: [{
-        id: {
-            type: String
-        }
+        type: String
     }]
 });
 
