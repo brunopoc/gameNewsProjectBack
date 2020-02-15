@@ -4,6 +4,7 @@ const Posts = mongoose.model("Posts");
 const Categories = mongoose.model("Categories");
 const stripHtml = require("string-strip-html");
 const format = require("../services/utils/format");
+const path = require("path");
 
 exports.get = async (req, res, next) => {
   const resPerPage = 8;
@@ -87,9 +88,10 @@ exports.getCategories = async (req, res, next) => {
 
 exports.postFile = (req, res, next) => {
   const name = req.file.filename || req.file.name;
+  const { location: url = `http://localhost:4000/files/${name}` } = req.file;
   res.json({
     uploaded: true,
-    url: `http://localhost:4000/files/${name}`
+    url
   });
 };
 
