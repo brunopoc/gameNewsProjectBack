@@ -10,5 +10,6 @@ router.get('/users/list', authService.authorize,  usersController.get);
 router.get('/users/myuser', authService.authorize,  usersController.myuser);
 router.post('/users/singin', usersController.login);
 router.post('/users/singup', usersController.singup);
+router.post('/users/update/likes', authService.authorize, usersController.updateLikedPosts);
 
 module.exports = router;

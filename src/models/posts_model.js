@@ -28,9 +28,49 @@ const schema = new Schema({
             default: Date.now
         },
         author: {
-            type: String,
-            trim: true
-        }
+            name: {
+                type: String,
+                trim: true,
+                required: true 
+            },
+            id:  {
+                type: String,
+                trim: true,
+                required: true 
+            },
+            image: {
+                type: String,
+                trim: true,
+                required: true 
+            },
+        },
+        answares: [{
+            text: { 
+                type: String,
+                trim: true 
+            },
+            commentedAt: {
+                type: Date,
+                default: Date.now
+            },
+            author: {
+                name: {
+                    type: String,
+                    trim: true,
+                    required: true 
+                },
+                id:  {
+                    type: String,
+                    trim: true,
+                    required: true 
+                },
+                image: {
+                    type: String,
+                    trim: true,
+                    required: true 
+                },
+            },
+        }]
     }],
     author: {
         name: { 

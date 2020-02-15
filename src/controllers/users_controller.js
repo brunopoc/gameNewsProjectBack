@@ -25,7 +25,7 @@ exports.singup = (req, res, next) => {
     user
     .save()
     .then(async (data) => {
-        const {_id: id, name, email} = data;
+        const {_id: id, name, email, likedPosts} = data;
         const token = await generateToken({
             email, name, id
         });
@@ -33,7 +33,7 @@ exports.singup = (req, res, next) => {
         res.status(201).send({
             token,
             data: {
-                email, name
+                email, name, id, likedPosts
             }});
     })
     .catch(e => {
@@ -47,7 +47,7 @@ exports.login = async (req, res, next) => {
         email: req.body.email,
         password: md5(req.body.password + global.SALT_KEY)
     })
-    .then(async ({_id: id, name, email, type}) => {
+    .then(async ({_id: id, name, email, type, likedPosts}) => {
         if(!id) {   
              res.status(400).send({message: "Usuario ou senha invalidos"});           
         }
@@ -57,7 +57,7 @@ exports.login = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name
+                email, name, id, likedPosts
             }
         });
         
@@ -74,7 +74,7 @@ exports.myuser = async (req, res, next) => {
     .findOne({
         email: data.email,
     })
-    .then(async ({_id: id, name, email, type}) => {
+    .then(async ({_id: id, name, email, type, likedPosts}) => {
         if(!id) {   
              res.status(400).send({message: "Usuario não encontrado"});           
         }
@@ -84,13 +84,34 @@ exports.myuser = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name
+                email, name, id, likedPosts
             }
         });
         
     })
     .catch(e => {
         res.status(400).send({message: "Falha ao listar o usuario", data: e});
+    });;
+};
+
+exports.updateLikedPosts = async (req, res, next) => {
+    const { likedPosts, id } = req.body;
+    User
+    .findByIdAndUpdate(id, {
+        $set: {
+            likedPosts
+        }
+    }, {new: true})
+    .then(async ({ name, email, likedPosts}) => {
+        res.status(200).send({
+            data: {
+                email, name, id, likedPosts
+            }
+        });
+        
+    })
+    .catch(e => {
+        res.status(400).send({message: "Falha ao curtir", data: e});
     });;
 };
 
