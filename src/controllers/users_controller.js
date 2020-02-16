@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const md5 = require('md5');
-const emailService = require('../services/email-service');
 const { generateToken, decodeToken } = require('../services/utils/token.utils');
 
 exports.get = (req, res, next) => {
@@ -29,7 +28,6 @@ exports.singup = (req, res, next) => {
         const token = await generateToken({
             email, name, id
         });
-        emailService.send(email, "Bem Vindo", global.EMAIL_TMPL.replace('{0}', name));
         res.status(201).send({
             token,
             data: {
