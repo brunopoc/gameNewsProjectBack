@@ -102,9 +102,9 @@ exports.updateLikes = async (req, res, next) => {
   console.log(action);
   console.log(counter);
   Posts.findByIdAndUpdate(id, { $inc: { likes: counter } }, {new: true})
-    .then(async ({ likes, _id }) => {
+    .then(async ({ likes, _id: id }) => {
       res.status(200).send({
-        _id,
+        id,
         likes
       });
     })
