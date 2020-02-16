@@ -1,7 +1,64 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const schema = new Schema({
+const answaresSchema = new Schema({
+    text: { 
+        type: String,
+        trim: true 
+    },
+    commentedAt: {
+        type: Date,
+        default: Date.now
+    },
+    author: {
+        name: {
+            type: String,
+            trim: true,
+            required: true 
+        },
+        id:  {
+            type: String,
+            trim: true,
+            required: true 
+        },
+        image: {
+            type: String,
+            trim: true,
+            required: true 
+        },
+    },
+});
+
+const commentsSchema = new Schema({
+    text: { 
+        type: String,
+        trim: true 
+    },
+    commentedAt: {
+        type: Date,
+        default: Date.now
+    },
+    author: {
+        name: {
+            type: String,
+            trim: true,
+            required: true 
+        },
+        id:  {
+            type: String,
+            trim: true,
+            required: true 
+        },
+        image: {
+            type: String,
+            trim: true,
+            required: true 
+        },
+    },
+    answares: [answaresSchema]
+});
+
+const postSchema = new Schema({
     title: {
         type: String,
         required: true,
@@ -18,60 +75,7 @@ const schema = new Schema({
         type: Number,
         default: 0
     },
-    comments: [{
-        text: { 
-            type: String,
-            trim: true 
-        },
-        commentedAt: {
-            type: Date,
-            default: Date.now
-        },
-        author: {
-            name: {
-                type: String,
-                trim: true,
-                required: true 
-            },
-            id:  {
-                type: String,
-                trim: true,
-                required: true 
-            },
-            image: {
-                type: String,
-                trim: true,
-                required: true 
-            },
-        },
-        answares: [{
-            text: { 
-                type: String,
-                trim: true 
-            },
-            commentedAt: {
-                type: Date,
-                default: Date.now
-            },
-            author: {
-                name: {
-                    type: String,
-                    trim: true,
-                    required: true 
-                },
-                id:  {
-                    type: String,
-                    trim: true,
-                    required: true 
-                },
-                image: {
-                    type: String,
-                    trim: true,
-                    required: true 
-                },
-            },
-        }]
-    }],
+    comments: [commentsSchema],
     author: {
         name: { 
             type: String,
@@ -126,4 +130,31 @@ const schema = new Schema({
     },
 });
 
-module.exports = mongoose.model('Posts', schema);
+answaresSchema.set('toJSON', {
+    transform : (doc, result) => {
+      return {
+        ...result,
+        id : result._id
+      };
+    }
+});
+
+commentsSchema.set('toJSON', {
+    transform : (doc, result) => {
+      return {
+        ...result,
+        id : result._id
+      };
+    }
+});
+
+postSchema.set('toJSON', {
+    transform : (doc, result) => {
+      return {
+        ...result,
+        id : result._id
+      };
+    }
+});
+
+module.exports = mongoose.model('Posts', postSchema);
