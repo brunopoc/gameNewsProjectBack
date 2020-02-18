@@ -11,5 +11,6 @@ router.get('/users/myuser', authService.authorize,  usersController.myuser);
 router.post('/users/singin', usersController.login);
 router.post('/users/singup', usersController.singup);
 router.post('/users/update/likes', authService.authorize, usersController.updateLikedPosts);
+router.post('/users/update/profile', authService.authorize, usersController.updateProfile);
 
 module.exports = router;

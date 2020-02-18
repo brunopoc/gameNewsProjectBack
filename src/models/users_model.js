@@ -38,7 +38,11 @@ const schema = new Schema({
     },
     likedPosts: [{
         type: String
-    }]
+    }],
+    avatar: {
+        type: String,
+        trim: true
+    }
 });
 
 schema.set('toJSON', {getters: true, virtuals: true});

@@ -23,8 +23,7 @@ const answaresSchema = new Schema({
         },
         image: {
             type: String,
-            trim: true,
-            required: true 
+            trim: true
         },
     },
 });
@@ -52,7 +51,6 @@ const commentsSchema = new Schema({
         image: {
             type: String,
             trim: true,
-            required: true 
         },
     },
     answares: [answaresSchema]
