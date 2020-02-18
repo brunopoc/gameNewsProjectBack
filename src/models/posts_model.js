@@ -126,6 +126,12 @@ const postSchema = new Schema({
         trim: true,
         unique: true,
     },
+    aprove: {
+        type: String,
+        required: true,
+        trim: true,
+        default: "pending"
+    },
 });
 
 answaresSchema.set('toJSON', {
