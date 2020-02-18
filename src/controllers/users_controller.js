@@ -23,8 +23,7 @@ exports.singup = (req, res, next) => {
     });
     user
     .save()
-    .then(async (data) => {
-        const {_id: id, name, email, likedPosts} = data;
+    .then(async ({_id: id, name, email, likedPosts}) => {
         const token = await generateToken({
             email, name, id
         });
@@ -45,7 +44,7 @@ exports.login = async (req, res, next) => {
         email: req.body.email,
         password: md5(req.body.password + global.SALT_KEY)
     })
-    .then(async ({_id: id, name, email, type, likedPosts}) => {
+    .then(async ({_id: id, name, email, type, likedPosts, avatar}) => {
         if(!id) {   
              res.status(400).send({message: "Usuario ou senha invalidos"});           
         }
@@ -55,7 +54,7 @@ exports.login = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name, id, likedPosts
+                email, name, id, likedPosts, avatar
             }
         });
         
@@ -72,7 +71,7 @@ exports.myuser = async (req, res, next) => {
     .findOne({
         email: data.email,
     })
-    .then(async ({_id: id, name, email, type, likedPosts}) => {
+    .then(async ({_id: id, name, email, type, likedPosts, avatar}) => {
         if(!id) {   
              res.status(400).send({message: "Usuario não encontrado"});           
         }
@@ -82,7 +81,7 @@ exports.myuser = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name, id, likedPosts
+                email, name, id, likedPosts, avatar
             }
         });
         
@@ -100,10 +99,32 @@ exports.updateLikedPosts = async (req, res, next) => {
             likedPosts
         }
     }, {new: true})
-    .then(async ({ name, email, likedPosts}) => {
+    .then(async ({ name, email, likedPosts }) => {
         res.status(200).send({
             data: {
                 email, name, id, likedPosts
+            }
+        });
+        
+    })
+    .catch(e => {
+        res.status(400).send({message: "Falha ao curtir", data: e});
+    });;
+};
+
+exports.updateProfile = async (req, res, next) => {
+    const { avatar, id, name } = req.body;
+    console.log(name);
+    User
+    .findByIdAndUpdate(id, {
+        $set: {
+            name, avatar
+        }
+    }, {new: true})
+    .then(async ({ name, email, avatar }) => {
+        res.status(200).send({
+            data: {
+                email, name, id, avatar
             }
         });
         
