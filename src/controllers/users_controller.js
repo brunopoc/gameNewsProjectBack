@@ -25,7 +25,7 @@ exports.singup = (req, res, next) => {
     .save()
     .then(async ({_id: id, name, email, likedPosts}) => {
         const token = await generateToken({
-            email, name, id
+            email, name, id, type
         });
         res.status(201).send({
             token,
@@ -54,7 +54,7 @@ exports.login = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name, id, likedPosts, avatar
+                email, name, id, likedPosts, avatar, type
             }
         });
         
@@ -81,7 +81,7 @@ exports.myuser = async (req, res, next) => {
         res.status(200).send({
             token,
             data: {
-                email, name, id, likedPosts, avatar
+                email, name, id, likedPosts, avatar, type
             }
         });
         
@@ -114,7 +114,6 @@ exports.updateLikedPosts = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     const { avatar, id, name } = req.body;
-    console.log(name);
     User
     .findByIdAndUpdate(id, {
         $set: {

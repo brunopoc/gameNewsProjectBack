@@ -4,11 +4,56 @@ const Posts = mongoose.model("Posts");
 const Categories = mongoose.model("Categories");
 const stripHtml = require("string-strip-html");
 const format = require("../services/utils/format");
-const path = require("path");
 
 exports.get = async (req, res, next) => {
   const resPerPage = 8;
   const page = req.params.page || 1;
+  try {
+    const foundPosts = await Posts.find({ aprove: "aproved" })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ aprove: "aproved" });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      list: foundPosts,
+      totalOfPages: totalOfPages,
+      currentPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
+exports.getPending = async (req, res, next) => {
+  const resPerPage = 5;
+  const page = req.params.page || 1;
+
+  try {
+    const foundPosts = await Posts.find({ aprove: "pending" })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ aprove: "pending" });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      pending: foundPosts,
+      totalOfPendingPages: totalOfPages,
+      currentPendingPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
+exports.getAll = async (req, res, next) => {
+  const resPerPage = 5;
+  const page = req.params.page || 1;
+
   try {
     const foundPosts = await Posts.find()
       .skip(resPerPage * page - resPerPage)
@@ -17,9 +62,36 @@ exports.get = async (req, res, next) => {
     const numOfPosts = await Posts.count();
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
-      list: foundPosts,
-      totalOfPages: totalOfPages,
-      currentPage: page
+      allPosts: foundPosts,
+      totalOfAllPages: totalOfPages,
+      currentAllPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
+exports.getPersonal = async (req, res, next) => {
+  const resPerPage = 5;
+  const page = req.params.page || 1;
+  const id = req.params.id;
+
+  try {
+    const foundPosts = await Posts.find({
+      "author.id": id,
+      $or: [{ aprove: "pending" }, { aprove: "aproved" }]
+    })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ "author.id": id });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      personalPosts: foundPosts,
+      totalOfPersonalPages: totalOfPages,
+      currentPersonalPage: page
     });
   } catch (err) {
     res
@@ -41,23 +113,52 @@ exports.getOne = (req, res, next) => {
 };
 
 exports.post = (req, res, next) => {
-  const article = req.body;
-  const refer = format.convertToSlug(article.title);
+  const { title, content, image, categories, tags, id, author } = req.body;
+  const refer = format.convertToSlug(title);
   const resume = stripHtml(
-    req.body.content
+    content
       .match(/.{1,200}/g)[0]
       .trim()
       .concat(" ...")
   );
-  let posts = new Posts({ ...article, resume, refer });
-  posts
-    .save()
-    .then(data => {
-      res.status(201).send({ status: "Success" });
+  if (!!id) {
+    Posts.findByIdAndUpdate(id, {
+      $set: {
+        title,
+        resume,
+        refer,
+        content,
+        image,
+        categories,
+        tags
+      }
     })
-    .catch(e => {
-      res.status(400).send({ status: "Error", data: e });
+      .then(data => {
+        res.status(201).send({ status: "Success" });
+      })
+      .catch(e => {
+        res.status(400).send({ status: "Error", data: e });
+      });
+  } else {
+    let posts = new Posts({
+      title,
+      resume,
+      refer,
+      content,
+      image,
+      categories,
+      tags,
+      author
     });
+    posts
+      .save()
+      .then(data => {
+        res.status(201).send({ status: "Success" });
+      })
+      .catch(e => {
+        res.status(400).send({ status: "Error", data: e });
+      });
+  }
 };
 
 exports.addCategorie = (req, res, next) => {
@@ -99,9 +200,7 @@ exports.updateLikes = async (req, res, next) => {
   const id = req.params.id;
   const action = req.body.action;
   const counter = action === "Liked" ? 1 : -1;
-  console.log(action);
-  console.log(counter);
-  Posts.findByIdAndUpdate(id, { $inc: { likes: counter } }, {new: true})
+  Posts.findByIdAndUpdate(id, { $inc: { likes: counter } }, { new: true })
     .then(async ({ likes, _id: id }) => {
       res.status(200).send({
         id,
@@ -116,7 +215,7 @@ exports.updateLikes = async (req, res, next) => {
 exports.postComment = async (req, res, next) => {
   const id = req.params.id;
   const commentsData = req.body;
-  Posts.findByIdAndUpdate(id, { comments: commentsData }, {new: true})
+  Posts.findByIdAndUpdate(id, { comments: commentsData }, { new: true })
     .then(async ({ _id, comments }) => {
       res.status(200).send({
         _id,
@@ -125,5 +224,30 @@ exports.postComment = async (req, res, next) => {
     })
     .catch(e => {
       res.status(400).send({ message: "Falha ao comentar", data: e });
+    });
+};
+
+exports.updatePendingPost = async (req, res, next) => {
+  const id = req.params.id;
+  const { aprove } = req.body;
+  Posts.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        aprove
+      }
+    },
+    { new: true }
+  )
+    .then(async ({ aprove, _id: id }) => {
+      res.status(200).send({
+        id,
+        aprove
+      });
+    })
+    .catch(e => {
+      res
+        .status(400)
+        .send({ message: "Falha ao aprovar a publicação", data: e });
     });
 };

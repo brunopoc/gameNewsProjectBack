@@ -15,5 +15,9 @@ router.get('/posts/listCategories', authService.authorize, postsController.getCa
 router.get('/posts/article/:refer', postsController.getOne);
 router.post('/posts/like/:id', authService.authorize, postsController.updateLikes);
 router.post('/posts/comment/:id', authService.authorize, postsController.postComment);
+router.get('/posts/pending/:page', authService.authorizeAdmin, postsController.getPending);
+router.post('/posts/aprove/:id', authService.authorizeAdmin, postsController.updatePendingPost);
+router.get('/posts/all/:page', authService.authorizeAdmin, postsController.getAll);
+router.get('/posts/:id/personal/:page', authService.authorizeAdmin, postsController.getPersonal);
 
 module.exports = router;

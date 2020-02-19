@@ -78,6 +78,10 @@ const postSchema = new Schema({
         name: { 
             type: String,
             trim: true
+        },
+        id: { 
+            type: String,
+            trim: true
         }
     },
     postType: {
@@ -125,6 +129,12 @@ const postSchema = new Schema({
         required: true,
         trim: true,
         unique: true,
+    },
+    aprove: {
+        type: String,
+        required: true,
+        trim: true,
+        default: "pending"
     },
 });
 

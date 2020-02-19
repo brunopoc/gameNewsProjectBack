@@ -7,8 +7,12 @@ const createToken = function(data) {
 };
 
 exports.decodeToken = async (token) => {
-    var data = await jwt.verify(token, global.SALT_KEY);
-    return data;
+    try {
+        var data = await jwt.verify(token, global.SALT_KEY);
+        return data;
+    } catch  (err) {
+        console.log(err);
+    }
 }
 
 exports.generateToken = function(data) {
