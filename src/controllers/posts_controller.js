@@ -86,23 +86,38 @@ exports.getOne = (req, res, next) => {
 };
 
 exports.post = (req, res, next) => {
-  const article = req.body;
-  const refer = format.convertToSlug(article.title);
+  const { title, content, image, categories, tags, id, author } = req.body;
+  const refer = format.convertToSlug(title);
   const resume = stripHtml(
-    req.body.content
+    content
       .match(/.{1,200}/g)[0]
       .trim()
       .concat(" ...")
   );
-  let posts = new Posts({ ...article, resume, refer });
-  posts
-    .save()
+  if(!!id) { 
+    Posts.findByIdAndUpdate(id, {
+      $set: {
+        title, resume, refer, content, image, categories, tags
+      }
+    })
     .then(data => {
       res.status(201).send({ status: "Success" });
     })
     .catch(e => {
       res.status(400).send({ status: "Error", data: e });
-    });
+    });  
+
+  } else {
+    let posts = new Posts({ title, resume, refer, content, image, categories, tags, author });
+    posts
+      .save()
+      .then(data => {
+        res.status(201).send({ status: "Success" });
+      })
+      .catch(e => {
+        res.status(400).send({ status: "Error", data: e });
+      });
+  }
 };
 
 exports.addCategorie = (req, res, next) => {
