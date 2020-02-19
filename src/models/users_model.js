@@ -42,6 +42,10 @@ const schema = new Schema({
     avatar: {
         type: String,
         trim: true
+    },
+    blocked: {
+        type: Boolean,
+        default: false
     }
 });
 

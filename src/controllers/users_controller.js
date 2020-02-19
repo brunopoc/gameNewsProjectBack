@@ -1,136 +1,200 @@
-'use strict'
-const mongoose = require('mongoose');
-const User = mongoose.model('User');
-const md5 = require('md5');
-const { generateToken, decodeToken } = require('../services/utils/token.utils');
+"use strict";
+const mongoose = require("mongoose");
+const User = mongoose.model("User");
+const md5 = require("md5");
+const { generateToken, decodeToken } = require("../services/utils/token.utils");
 
-exports.get = (req, res, next) => {
-    User
-    .find({}, 'name email')
-    .then(data => {
-        res.status(200).send(data);
-    })
-    .catch(e => {
-        res.status(400).send({message: "Falha ao listar os usuarios", data: e});
-    });;
+exports.get = async (req, res, next) => {
+  const resPerPage = 5;
+  const page = req.params.page || 1;
+
+  try {
+    const foundUsers = await User.find()
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfUsers = await User.count();
+    const totalOfPages = numOfUsers / resPerPage;
+    res.status(200).send({
+      users: foundUsers,
+      totalOfUsers: totalOfPages,
+      currentUsersPage: page
+    });
+  } catch (err) {
+    res.status(400).send({ message: "Falha ao listar os usuarios", data: e });
+  }
 };
 
 exports.singup = (req, res, next) => {
-    let user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password: md5(req.body.password + global.SALT_KEY)
-    });
-    user
+  let user = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: md5(req.body.password + global.SALT_KEY)
+  });
+  user
     .save()
-    .then(async ({_id: id, name, email, likedPosts}) => {
-        const token = await generateToken({
-            email, name, id, type
-        });
-        res.status(201).send({
-            token,
-            data: {
-                email, name, id, likedPosts
-            }});
+    .then(async ({ _id: id, name, email, likedPosts }) => {
+      const token = await generateToken({
+        email,
+        name,
+        id,
+        type
+      });
+      res.status(201).send({
+        token,
+        data: {
+          email,
+          name,
+          id,
+          likedPosts
+        }
+      });
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao cadastrar o usuario", data: e});
+      res
+        .status(400)
+        .send({ message: "Falha ao cadastrar o usuario", data: e });
     });
 };
 
 exports.login = async (req, res, next) => {
-    User
-    .findOne({
-        email: req.body.email,
-        password: md5(req.body.password + global.SALT_KEY)
-    })
-    .then(async ({_id: id, name, email, type, likedPosts, avatar}) => {
-        if(!id) {   
-             res.status(400).send({message: "Usuario ou senha invalidos"});           
+  User.findOne({
+    email: req.body.email,
+    password: md5(req.body.password + global.SALT_KEY),
+    blocked: false
+  })
+    .then(async ({ _id: id, name, email, type, likedPosts, avatar }) => {
+      if (!id) {
+        res.status(400).send({ message: "Usuario ou senha invalidos" });
+      }
+      const token = await generateToken({
+        email,
+        name,
+        id,
+        type
+      });
+      res.status(200).send({
+        token,
+        data: {
+          email,
+          name,
+          id,
+          likedPosts,
+          avatar,
+          type
         }
-        const token = await generateToken({
-            email, name, id, type
-        });
-        res.status(200).send({
-            token,
-            data: {
-                email, name, id, likedPosts, avatar, type
-            }
-        });
-        
+      });
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao logar o usuario", data: e});
-    });;
+      res.status(400).send({ message: "Falha ao logar o usuario", data: e });
+    });
 };
 
 exports.myuser = async (req, res, next) => {
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
-    const data = await decodeToken(token);
-    User
-    .findOne({
-        email: data.email,
-    })
-    .then(async ({_id: id, name, email, type, likedPosts, avatar}) => {
-        if(!id) {   
-             res.status(400).send({message: "Usuario não encontrado"});           
+  var token =
+    req.body.token || req.query.token || req.headers["x-access-token"];
+  const data = await decodeToken(token);
+  User.findOne({
+    email: data.email
+  })
+    .then(async ({ _id: id, name, email, type, likedPosts, avatar }) => {
+      if (!id) {
+        res.status(400).send({ message: "Usuario não encontrado" });
+      }
+      const token = await generateToken({
+        email,
+        name,
+        id,
+        type
+      });
+      res.status(200).send({
+        token,
+        data: {
+          email,
+          name,
+          id,
+          likedPosts,
+          avatar,
+          type
         }
-        const token = await generateToken({
-            email, name, id, type
-        });
-        res.status(200).send({
-            token,
-            data: {
-                email, name, id, likedPosts, avatar, type
-            }
-        });
-        
+      });
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao listar o usuario", data: e});
-    });;
+      res.status(400).send({ message: "Falha ao listar o usuario", data: e });
+    });
 };
 
 exports.updateLikedPosts = async (req, res, next) => {
-    const { likedPosts, id } = req.body;
-    User
-    .findByIdAndUpdate(id, {
-        $set: {
-            likedPosts
-        }
-    }, {new: true})
+  const { likedPosts, id } = req.body;
+  User.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        likedPosts
+      }
+    },
+    { new: true }
+  )
     .then(async ({ name, email, likedPosts }) => {
-        res.status(200).send({
-            data: {
-                email, name, id, likedPosts
-            }
-        });
-        
+      res.status(200).send({
+        data: {
+          email,
+          name,
+          id,
+          likedPosts
+        }
+      });
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao curtir", data: e});
-    });;
+      res.status(400).send({ message: "Falha ao curtir", data: e });
+    });
 };
 
 exports.updateProfile = async (req, res, next) => {
-    const { avatar, id, name } = req.body;
-    User
-    .findByIdAndUpdate(id, {
-        $set: {
-            name, avatar
-        }
-    }, {new: true})
+  const { avatar, id, name } = req.body;
+  User.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        name,
+        avatar
+      }
+    },
+    { new: true }
+  )
     .then(async ({ name, email, avatar }) => {
-        res.status(200).send({
-            data: {
-                email, name, id, avatar
-            }
-        });
-        
+      res.status(200).send({
+        data: {
+          email,
+          name,
+          id,
+          avatar
+        }
+      });
     })
     .catch(e => {
-        res.status(400).send({message: "Falha ao curtir", data: e});
-    });;
+      res.status(400).send({ message: "Falha ao curtir", data: e });
+    });
 };
 
-
+exports.updateBlocked = async (req, res, next) => {
+  const { blocked, id } = req.body;
+  User.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        blocked
+      }
+    },
+    { new: true }
+  )
+    .then(async ({ blocked }) => {
+      res.status(200).send({
+        id,
+        blocked
+      });
+    })
+    .catch(e => {
+      res.status(400).send({ message: "Falha ao curtir", data: e });
+    });
+};
