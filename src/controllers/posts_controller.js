@@ -73,6 +73,33 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+exports.getPersonal = async (req, res, next) => {
+  const resPerPage = 5;
+  const page = req.params.page || 1;
+  const id = req.params.id;
+
+  try {
+    const foundPosts = await Posts.find({
+      "author.id": id,
+      $or: [{ aprove: "pending" }, { aprove: "aproved" }]
+    })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ "author.id": id });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      personalPosts: foundPosts,
+      totalOfPersonalPages: totalOfPages,
+      currentPersonalPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
 exports.getOne = (req, res, next) => {
   Posts.findOne({ refer: req.params.refer })
     .then(data => {
@@ -94,21 +121,35 @@ exports.post = (req, res, next) => {
       .trim()
       .concat(" ...")
   );
-  if(!!id) { 
+  if (!!id) {
     Posts.findByIdAndUpdate(id, {
       $set: {
-        title, resume, refer, content, image, categories, tags
+        title,
+        resume,
+        refer,
+        content,
+        image,
+        categories,
+        tags
       }
     })
-    .then(data => {
-      res.status(201).send({ status: "Success" });
-    })
-    .catch(e => {
-      res.status(400).send({ status: "Error", data: e });
-    });  
-
+      .then(data => {
+        res.status(201).send({ status: "Success" });
+      })
+      .catch(e => {
+        res.status(400).send({ status: "Error", data: e });
+      });
   } else {
-    let posts = new Posts({ title, resume, refer, content, image, categories, tags, author });
+    let posts = new Posts({
+      title,
+      resume,
+      refer,
+      content,
+      image,
+      categories,
+      tags,
+      author
+    });
     posts
       .save()
       .then(data => {
@@ -191,9 +232,11 @@ exports.updatePendingPost = async (req, res, next) => {
   const { aprove } = req.body;
   Posts.findByIdAndUpdate(
     id,
-    {$set: {
-      aprove
-    }},
+    {
+      $set: {
+        aprove
+      }
+    },
     { new: true }
   )
     .then(async ({ aprove, _id: id }) => {
@@ -203,6 +246,8 @@ exports.updatePendingPost = async (req, res, next) => {
       });
     })
     .catch(e => {
-      res.status(400).send({ message: "Falha ao aprovar a publicação", data: e });
+      res
+        .status(400)
+        .send({ message: "Falha ao aprovar a publicação", data: e });
     });
 };

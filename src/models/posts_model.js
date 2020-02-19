@@ -78,6 +78,10 @@ const postSchema = new Schema({
         name: { 
             type: String,
             trim: true
+        },
+        id: { 
+            type: String,
+            trim: true
         }
     },
     postType: {
