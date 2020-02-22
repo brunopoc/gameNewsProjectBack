@@ -6,11 +6,12 @@ const authService = require('../services/auth-service');
 
 const usersController = require('../controllers/users_controller');
 
-router.get('/users/list', authService.authorize,  usersController.get);
+router.get('/users/list/:page', authService.authorizeAdmin,  usersController.get);
 router.get('/users/myuser', authService.authorize,  usersController.myuser);
 router.post('/users/singin', usersController.login);
 router.post('/users/singup', usersController.singup);
 router.post('/users/update/likes', authService.authorize, usersController.updateLikedPosts);
 router.post('/users/update/profile', authService.authorize, usersController.updateProfile);
+router.post('/users/admin/blocked', authService.authorizeAdmin,  usersController.updateBlocked);
 
 module.exports = router;

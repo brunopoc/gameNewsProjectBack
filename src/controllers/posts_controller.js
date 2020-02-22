@@ -4,6 +4,7 @@ const Posts = mongoose.model("Posts");
 const Categories = mongoose.model("Categories");
 const stripHtml = require("string-strip-html");
 const format = require("../services/utils/format");
+const { decodeToken } = require("../services/utils/token.utils");
 
 exports.get = async (req, res, next) => {
   const resPerPage = 8;
@@ -74,19 +75,21 @@ exports.getAll = async (req, res, next) => {
 };
 
 exports.getPersonal = async (req, res, next) => {
+
+  var token =
+    req.body.token || req.query.token || req.headers["x-access-token"];
+  const data = await decodeToken(token);
   const resPerPage = 5;
   const page = req.params.page || 1;
-  const id = req.params.id;
-
   try {
     const foundPosts = await Posts.find({
-      "author.id": id,
-      $or: [{ aprove: "pending" }, { aprove: "aproved" }]
-    })
+        "author.id": data.id,
+        $or: [{ aprove: "pending" }, { aprove: "aproved" }]
+      })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
-    const numOfPosts = await Posts.count({ "author.id": id });
+    const numOfPosts = await Posts.count({ "author.id": data.id });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       personalPosts: foundPosts,

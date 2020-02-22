@@ -11,6 +11,7 @@ const path = require("path");
 const User = require('./models/users_model');
 const Categories = require('./models/categories_model');
 const Posts = require('./models/posts_model');
+const Complaints = require('./models/complaints_model');
 
 mongoose.connect(config.connectionString, {useNewUrlParser: true});
 
@@ -44,9 +45,11 @@ app.use(
 const indexRoutes = require('./routes/index_routes');
 const usersRoutes = require('./routes/users_routes');
 const postsRoutes = require('./routes/posts_routes');
+const complaintsRoutes = require('./routes/complaints_routes');
 
 app.use('/api/v1/', indexRoutes);
 app.use('/api/v1/', usersRoutes);
 app.use('/api/v1/', postsRoutes);
+app.use('/api/v1/', complaintsRoutes);
 
 module.exports = app; 
