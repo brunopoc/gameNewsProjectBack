@@ -28,6 +28,52 @@ exports.get = async (req, res, next) => {
   }
 };
 
+exports.getByCategory = async (req, res, next) => {
+  const resPerPage = 8;
+  const page = req.params.page || 1;
+  const category = req.params.category;
+  try {
+    const foundPosts = await Posts.find({ "categories.label": category })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ "categories.label": category });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      list: foundPosts,
+      totalOfPages: totalOfPages,
+      currentPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
+exports.getByTags = async (req, res, next) => {
+  const resPerPage = 8;
+  const page = req.params.page || 1;
+  const tags = req.params.tags;
+  try {
+    const foundPosts = await Posts.find({ "tags.label": tags })
+      .skip(resPerPage * page - resPerPage)
+      .limit(resPerPage)
+      .sort({ createdAt: -1 });
+    const numOfPosts = await Posts.count({ "tags.label": tags });
+    const totalOfPages = numOfPosts / resPerPage;
+    res.status(200).send({
+      list: foundPosts,
+      totalOfPages: totalOfPages,
+      currentPage: page
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
 exports.getPending = async (req, res, next) => {
   const resPerPage = 5;
   const page = req.params.page || 1;
@@ -180,10 +226,7 @@ exports.addCategorie = (req, res, next) => {
 exports.getCategories = async (req, res, next) => {
   Categories.find()
     .then(data => {
-      const filteredData = data.map(item => {
-        return { label: item.title, value: item._id };
-      });
-      res.status(200).send(filteredData);
+      res.status(200).send(data);
     })
     .catch(e => {
       res.status(400).send({ message: "Falha ao listar os usuarios", data: e });
