@@ -18,7 +18,7 @@ router.post('/posts/', authService.authorize, postsController.post);
 router.post('/posts/like/:id', authService.authorize, postsController.updateLikes);
 router.post('/posts/comment/:id', authService.authorize, postsController.postComment);
 router.post('/posts/addCategorie', authService.authorize, postsController.addCategorie);
-router.post('/posts/uploadImage/', authService.authorize, multer(multerConfig).single('upload'), postsController.postFile);
+router.post('/posts/uploadImage/', multer(multerConfig).single('upload'), postsController.postFile);
 
 router.get('/posts/all/:page', authService.authorizeAdmin, postsController.getAll);
 router.get('/posts/pending/:page', authService.authorizeAdmin, postsController.getPending);
