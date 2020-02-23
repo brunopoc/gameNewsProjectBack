@@ -33,11 +33,11 @@ exports.getByCategory = async (req, res, next) => {
   const page = req.params.page || 1;
   const category = req.params.category;
   try {
-    const foundPosts = await Posts.find({ "categories.label": category })
+    const foundPosts = await Posts.find({ "categories.value": category, aprove: "aproved" })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
-    const numOfPosts = await Posts.count({ "categories.label": category });
+    const numOfPosts = await Posts.count({ "categories.value": category, aprove: "aproved" });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
@@ -56,11 +56,11 @@ exports.getByTags = async (req, res, next) => {
   const page = req.params.page || 1;
   const tags = req.params.tags;
   try {
-    const foundPosts = await Posts.find({ "tags.label": tags })
+    const foundPosts = await Posts.find({ "tags.label": tags, aprove: "aproved" })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
-    const numOfPosts = await Posts.count({ "tags.label": tags });
+    const numOfPosts = await Posts.count({ "tags.label": tags, aprove: "aproved" });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
@@ -163,6 +163,7 @@ exports.getOne = (req, res, next) => {
 
 exports.post = (req, res, next) => {
   const { title, content, image, categories, tags, id, author } = req.body;
+  const tagsRef = tags.map(tag => ({ ...tag, value: format.convertToSlug(tag.value) }))
   const refer = format.convertToSlug(title);
   const resume = stripHtml(
     content
@@ -179,7 +180,7 @@ exports.post = (req, res, next) => {
         content,
         image,
         categories,
-        tags
+        tags: tagsRef
       }
     })
       .then(data => {
@@ -196,7 +197,7 @@ exports.post = (req, res, next) => {
       content,
       image,
       categories,
-      tags,
+      tags: tagsRef,
       author
     });
     posts
@@ -212,7 +213,8 @@ exports.post = (req, res, next) => {
 
 exports.addCategorie = (req, res, next) => {
   const categorie = req.body;
-  let category = new Categories({ ...categorie });
+  const value = format.convertToSlug(categorie.label);
+  let category = new Categories({ ...categorie, value: value });
   category
     .save()
     .then(data => {
