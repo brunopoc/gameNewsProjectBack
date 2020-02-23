@@ -33,11 +33,17 @@ exports.getByCategory = async (req, res, next) => {
   const page = req.params.page || 1;
   const category = req.params.category;
   try {
-    const foundPosts = await Posts.find({ "categories.value": category, aprove: "aproved" })
+    const foundPosts = await Posts.find({
+      "categories.value": category,
+      aprove: "aproved"
+    })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
-    const numOfPosts = await Posts.count({ "categories.value": category, aprove: "aproved" });
+    const numOfPosts = await Posts.count({
+      "categories.value": category,
+      aprove: "aproved"
+    });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
@@ -56,11 +62,17 @@ exports.getByTags = async (req, res, next) => {
   const page = req.params.page || 1;
   const tags = req.params.tags;
   try {
-    const foundPosts = await Posts.find({ "tags.label": tags, aprove: "aproved" })
+    const foundPosts = await Posts.find({
+      "tags.label": tags,
+      aprove: "aproved"
+    })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
-    const numOfPosts = await Posts.count({ "tags.label": tags, aprove: "aproved" });
+    const numOfPosts = await Posts.count({
+      "tags.label": tags,
+      aprove: "aproved"
+    });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
@@ -121,7 +133,6 @@ exports.getAll = async (req, res, next) => {
 };
 
 exports.getPersonal = async (req, res, next) => {
-
   var token =
     req.body.token || req.query.token || req.headers["x-access-token"];
   const data = await decodeToken(token);
@@ -129,9 +140,9 @@ exports.getPersonal = async (req, res, next) => {
   const page = req.params.page || 1;
   try {
     const foundPosts = await Posts.find({
-        "author.id": data.id,
-        $or: [{ aprove: "pending" }, { aprove: "aproved" }]
-      })
+      "author.id": data.id,
+      $or: [{ aprove: "pending" }, { aprove: "aproved" }]
+    })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
@@ -163,7 +174,13 @@ exports.getOne = (req, res, next) => {
 
 exports.post = (req, res, next) => {
   const { title, content, image, categories, tags, id, author } = req.body;
-  const tagsRef = tags.map(tag => ({ ...tag, value: format.convertToSlug(tag.value) }))
+  let tagsRef;
+  if (tags) {
+    tagsRef = tags.map(tag => ({
+      ...tag,
+      value: format.convertToSlug(tag.value)
+    }));
+  }
   const refer = format.convertToSlug(title);
   const resume = stripHtml(
     content
