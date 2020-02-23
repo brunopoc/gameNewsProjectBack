@@ -33,7 +33,7 @@ exports.singup = (req, res, next) => {
   });
   user
     .save()
-    .then(async ({ _id: id, name, email, likedPosts }) => {
+    .then(async ({ _id: id, name, email, likedPosts, type }) => {
       const token = await generateToken({
         email,
         name,
@@ -46,7 +46,8 @@ exports.singup = (req, res, next) => {
           email,
           name,
           id,
-          likedPosts
+          likedPosts,
+          type
         }
       });
     })
