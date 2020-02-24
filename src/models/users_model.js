@@ -7,9 +7,14 @@ const schema = new Schema({
         required: true,
         trim: true
     },
+    nickname: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true
+    },
     email: {
         type: String, 
-        required: true,
         trim: true, 
         unique: true,
         match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
@@ -18,6 +23,18 @@ const schema = new Schema({
         type: String,
         required: true,
         trim: true
+    },
+    passwordResetToken: {
+        type: String,
+        select: false,
+    },
+    passwordResetExpires: {
+        type: String,
+        select: false,
+    },
+    emailConfirmToken: {
+        type: String,
+        select: false,
     },
     createdAt: {
         type: Date,
@@ -32,7 +49,7 @@ const schema = new Schema({
         type: Boolean,
         default: false
     },
-    checkedProfile: {
+    emailChecked: {
         type: Boolean,
         default: false
     },

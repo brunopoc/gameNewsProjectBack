@@ -2,6 +2,7 @@
 const mongoose = require("mongoose");
 const Posts = mongoose.model("Posts");
 const Categories = mongoose.model("Categories");
+const Upload = mongoose.model("Upload");
 const stripHtml = require("string-strip-html");
 const format = require("../services/utils/format");
 const { decodeToken } = require("../services/utils/token.utils");
@@ -255,10 +256,16 @@ exports.getCategories = async (req, res, next) => {
 exports.postFile = (req, res, next) => {
   const name = req.file.filename || req.file.name;
   const { location: url = `http://localhost:4000/files/${name}` } = req.file;
-  res.json({
-    uploaded: true,
-    url
-  });
+
+  let uploadFile = new Upload({ url });
+  uploadFile
+    .save()
+    .then(data => {
+      res.status(201).send({ status: "Success", uploaded: true, url });
+    })
+    .catch(e => {
+      res.status(400).send({ status: "Error", data: e });
+    });
 };
 
 exports.updateLikes = async (req, res, next) => {

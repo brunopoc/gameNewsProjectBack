@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const md5 = require("md5");
 const { generateToken, decodeToken } = require("../services/utils/token.utils");
+const crypto = require("crypto");
+const mailer = require("../services/email/mailer");
 
 exports.get = async (req, res, next) => {
   const resPerPage = 5;
@@ -26,25 +28,46 @@ exports.get = async (req, res, next) => {
 };
 
 exports.singup = (req, res, next) => {
+  const emailToken = crypto.randomBytes(20).toString("hex");
+  const { email, name, password, nickname } = req.body;
   let user = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password: md5(req.body.password + global.SALT_KEY)
+    name: name,
+    email: email,
+    nickname,
+    password: md5(password + global.SALT_KEY),
+    emailConfirmToken: emailToken
   });
   user
     .save()
-    .then(async ({ _id: id, name, email, likedPosts, type }) => {
-      const token = await generateToken({
+    .then(async ({ _id: id, name, email, likedPosts, type, nickname }) => {
+      mailer.sendMail(
+        {
+          to: email,
+          from: "suporte@sougamercomorgulho.com.br",
+          subject: "Confirme seu Email - Bem Vindo ao Sou Gamer Com Orgulho!",
+          template: "confirmemail",
+          context: { token: emailToken, name }
+        },
+        err => {
+          if (err) {
+            res.status(400).send({ message: "emailNotSend", data: err });
+          }
+        }
+      );
+
+      const userToken = await generateToken({
         email,
-        name,
+        nickname,
         id,
         type
       });
+
       res.status(201).send({
-        token,
+        token: userToken,
         data: {
           email,
           name,
+          nickname,
           id,
           likedPosts,
           type
@@ -89,6 +112,100 @@ exports.login = async (req, res, next) => {
     .catch(e => {
       res.status(400).send({ message: "Falha ao logar o usuario", data: e });
     });
+};
+
+exports.forgetpassword = async (req, res, next) => {
+  User.findOne({
+    email: req.body.email
+  })
+    .then(async ({ _id: id, email }) => {
+      if (!id) {
+        res.status(400).send({ message: "mailNotFound" });
+      }
+      const token = crypto.randomBytes(20).toString("hex");
+
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+
+      await User.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            passwordResetToken: token,
+            passwordResetExpires: now
+          }
+        },
+        { new: true }
+      );
+
+      mailer.sendMail(
+        {
+          to: email,
+          from: "suporte@sougamercomorgulho.com.br",
+          template: "forgotpassword",
+          subject: "Resete sua senha - Sou Gamer Com Orgulho!",
+          context: { token }
+        },
+        err => {
+          if (err) {
+            res.status(400).send({ message: "emailNotSend", data: err });
+          }
+          res.status(200).send({ message: "Success" });
+        }
+      );
+    })
+    .catch(e => {
+      res.status(400).send({ message: "errorOcurred", data: e });
+    });
+};
+
+exports.resetpassword = async (req, res, next) => {
+  const { email, token, password } = req.body;
+  try {
+    const user = await User.findOne({
+      email: email
+    }).select("+passwordResetToken passwordResetExpires");
+
+    if (!user) return res.status(400).send({ message: "userNotFound" });
+
+    if (token !== user.passwordResetToken)
+      return res.status(400).send({ message: "invalidToken" });
+
+    const now = new Date();
+
+    if (now > user.passwordResetExpires)
+      return res.status(400).send({ message: "expiredToken" });
+
+    user.password = md5(password + global.SALT_KEY);
+
+    user.save();
+
+    res.status(200).send({ message: "Success" });
+  } catch (err) {
+    res.status(400).send({ message: "cantResetPassword", data: err });
+  }
+};
+
+exports.confirmemail = async (req, res, next) => {
+  const { token } = req.body;
+  try {
+    const user = await User.findOne({
+      emailConfirmToken: token
+    }).select("+emailConfirmToken");
+
+    if (!user) return res.status(400).send({ message: "userNotFound" });
+
+    if (token !== user.emailConfirmToken)
+      return res.status(400).send({ message: "invalidToken" });
+
+    user.emailChecked = true;
+
+    user.save();
+
+    res.status(200).send({ message: "Success" });
+  } catch (err) {
+    res.status(400).send({ message: "cantResetPassword", data: err });
+  }
 };
 
 exports.myuser = async (req, res, next) => {
