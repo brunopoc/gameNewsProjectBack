@@ -133,6 +133,24 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+exports.getSimilar = async (req, res, next) => {
+  const resPerPage = 3;
+  const category = req.params.category;
+  try {
+    const foundPosts = await Posts.aggregate([
+      {$sample: {size: resPerPage}}
+    ]);
+    console.log(foundPosts)
+    res.status(200).send({
+      similar: foundPosts,
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
 exports.getPersonal = async (req, res, next) => {
   var token =
     req.body.token || req.query.token || req.headers["x-access-token"];

@@ -12,6 +12,7 @@ router.get('/posts/list/:page', postsController.get);
 router.get('/posts/category/:category/:page', postsController.getByCategory);
 router.get('/posts/tag/:tags/:page', postsController.getByTags);
 router.get('/posts/listCategories', postsController.getCategories);
+router.get('/posts/similar/:category', postsController.getSimilar);
 router.post('/posts/uploadImage/', multer(multerConfig).single('upload'), postsController.postFile);
 
 router.get('/posts/personal/:page', authService.authorize, postsController.getPersonal);
