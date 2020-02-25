@@ -64,14 +64,14 @@ exports.getByTags = async (req, res, next) => {
   const tags = req.params.tags;
   try {
     const foundPosts = await Posts.find({
-      "tags.label": tags,
+      "tags.value": tags,
       aprove: "aproved"
     })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
     const numOfPosts = await Posts.count({
-      "tags.label": tags,
+      "tags.value": tags,
       aprove: "aproved"
     });
     const totalOfPages = numOfPosts / resPerPage;
