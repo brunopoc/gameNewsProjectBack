@@ -135,14 +135,13 @@ exports.getAll = async (req, res, next) => {
 
 exports.getSimilar = async (req, res, next) => {
   const resPerPage = 3;
-  const category = req.params.category;
   try {
     const foundPosts = await Posts.aggregate([
-      {$sample: {size: resPerPage}}
+      { $match: { aprove: "aproved" } },
+      { $sample: { size: resPerPage } }
     ]);
-    console.log(foundPosts)
     res.status(200).send({
-      similar: foundPosts,
+      similar: foundPosts
     });
   } catch (err) {
     res
@@ -182,6 +181,7 @@ exports.getPersonal = async (req, res, next) => {
 exports.getOne = (req, res, next) => {
   Posts.findOne({ refer: req.params.refer })
     .then(data => {
+      Posts.findByIdAndUpdate(data.id, { $inc: { views: 1 } });
       res.status(200).send(data);
     })
     .catch(e => {
@@ -189,6 +189,45 @@ exports.getOne = (req, res, next) => {
         .status(400)
         .send({ message: "Falha ao carregar a postagem", data: e });
     });
+};
+
+exports.getmostViewedsInWeek = async (req, res, next) => {
+  try {
+    const foundPosts = await Posts.find({
+      aprove: "aproved",
+      createdAt: {
+        $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+      }
+    });
+    res.status(200).send({
+      mostViewedInWeek: foundPosts
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
+exports.getmostLikedInWeek = async (req, res, next) => {
+  const resPerPage = 5;
+  try {
+    const foundPosts = await Posts.find({
+      aprove: "aproved",
+      createdAt: {
+        $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+      }
+    })
+      .limit(resPerPage)
+      .sort({ likes: -1 });
+    res.status(200).send({
+      mostLikedInWeek: foundPosts
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
 };
 
 exports.post = (req, res, next) => {
