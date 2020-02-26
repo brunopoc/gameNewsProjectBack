@@ -192,13 +192,16 @@ exports.getOne = (req, res, next) => {
 };
 
 exports.getmostViewedsInWeek = async (req, res, next) => {
+  const resPerPage = 5;
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
       createdAt: {
         $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
       }
-    });
+    })
+      .sort({ views: -1 })
+      .limit(resPerPage);
     res.status(200).send({
       mostViewedInWeek: foundPosts
     });
@@ -218,8 +221,8 @@ exports.getmostLikedInWeek = async (req, res, next) => {
         $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
       }
     })
-      .limit(resPerPage)
-      .sort({ likes: -1 });
+      .sort({ likes: -1 })
+      .limit(resPerPage);
     res.status(200).send({
       mostLikedInWeek: foundPosts
     });
