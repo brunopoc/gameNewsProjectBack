@@ -8,7 +8,7 @@ const format = require("../services/utils/format");
 const { decodeToken } = require("../services/utils/token.utils");
 
 exports.get = async (req, res, next) => {
-  const resPerPage = 8;
+  const resPerPage = 10;
   const page = req.params.page || 1;
   try {
     const foundPosts = await Posts.find({ aprove: "aproved" })
@@ -192,7 +192,7 @@ exports.getOne = (req, res, next) => {
 };
 
 exports.getmostViewedsInWeek = async (req, res, next) => {
-  const resPerPage = 5;
+  const resPerPage = 10;
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
@@ -213,7 +213,7 @@ exports.getmostViewedsInWeek = async (req, res, next) => {
 };
 
 exports.getmostLikedInWeek = async (req, res, next) => {
-  const resPerPage = 5;
+  const resPerPage = 10;
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
