@@ -314,8 +314,8 @@ exports.getCategories = async (req, res, next) => {
 };
 
 exports.postFile = (req, res, next) => {
-  const name = req.file.filename || req.file.name;
-  const { location: url = `http://localhost:4000/files/${name}` } = req.file;
+  const name = req.file.filename || req.file.name || req.file.key || req.file.Key;
+  const { Location: url = `http://localhost:4000/files/${name}` } = req.file;
 
   let uploadFile = new Upload({ url });
   uploadFile
