@@ -15,5 +15,13 @@ module.exports = {
     dns: "empty",
     tls: "empty"
   },
+  module: {
+    rules: [
+      {
+        test: /\.node$/,
+        use: "node-loader"
+      }
+    ]
+  },
   target: "web"
 };
