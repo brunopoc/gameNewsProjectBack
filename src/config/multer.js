@@ -28,12 +28,12 @@ const storageTypes = {
       crypto.randomBytes(16, (err, hash) => {
         if (err) cb(err);
 
-        const fileName = `${hash.toString("hex")}-${file.originalname.replace(/\.[^/.]+$/, ".webp")}`;
+        const fileName = `${hash.toString("hex")}-${file.originalname.replace(/\.[^/.]+$/, ".jpeg")}`;
 
         cb(null, fileName);
       });
     },
-    toFormat: 'webp'
+    toFormat: 'jpeg'
   })
 };
 
