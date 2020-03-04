@@ -181,8 +181,12 @@ exports.getPersonal = async (req, res, next) => {
 exports.getOne = (req, res, next) => {
   Posts.findOne({ refer: req.params.refer })
     .then(data => {
-      Posts.findByIdAndUpdate(data.id, { $inc: { views: 1 } });
-      res.status(200).send(data);
+      Posts.findByIdAndUpdate(data.id, { $inc: { views: 1 } })
+        .then(e => res.status(200).send(data))
+        .catch(e => {
+          console.log(e);
+          res.status(200).send(data);
+        });
     })
     .catch(e => {
       res
