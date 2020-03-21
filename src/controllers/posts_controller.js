@@ -237,6 +237,27 @@ exports.getmostLikedInWeek = async (req, res, next) => {
   }
 };
 
+exports.getHighlights = async (req, res, next) => {
+  const resPerPage = 5;
+  try {
+    const foundPosts = await Posts.find({
+      aprove: "aproved",
+      createdAt: {
+        $gte: new Date(new Date() - 3 * 60 * 60 * 24 * 1000)
+      }
+    })
+      .sort({ views: -1 })
+      .limit(resPerPage);
+    res.status(200).send({
+      highlights: foundPosts
+    });
+  } catch (err) {
+    res
+      .status(400)
+      .send({ message: "Falha ao carregar as postagens", data: err });
+  }
+};
+
 exports.post = (req, res, next) => {
   const { title, content, image, categories, tags, id, author } = req.body;
   let tagsRef;

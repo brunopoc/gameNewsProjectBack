@@ -15,6 +15,7 @@ router.get('/posts/listCategories', postsController.getCategories);
 router.get('/posts/similar/:category', postsController.getSimilar);
 router.get('/posts/mostviewsinweek', postsController.getmostViewedsInWeek);
 router.get('/posts/mostlikedinweek', postsController.getmostLikedInWeek);
+router.get('/posts/highlights', postsController.getHighlights);
 router.post('/posts/uploadImage/', multer(multerConfig).single('upload'), postsController.postFile);
 
 router.get('/posts/personal/:page', authService.authorize, postsController.getPersonal);
