@@ -20,7 +20,7 @@ exports.get = async (req, res, next) => {
     res.status(200).send({
       list: foundPosts,
       totalOfPages: totalOfPages,
-      currentPage: page
+      currentPage: page,
     });
   } catch (err) {
     res
@@ -36,20 +36,20 @@ exports.getByCategory = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       "categories.value": category,
-      aprove: "aproved"
+      aprove: "aproved",
     })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
     const numOfPosts = await Posts.count({
       "categories.value": category,
-      aprove: "aproved"
+      aprove: "aproved",
     });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
       totalOfPages: totalOfPages,
-      currentPage: page
+      currentPage: page,
     });
   } catch (err) {
     res
@@ -65,20 +65,20 @@ exports.getByTags = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       "tags.value": tags,
-      aprove: "aproved"
+      aprove: "aproved",
     })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
       .sort({ createdAt: -1 });
     const numOfPosts = await Posts.count({
       "tags.value": tags,
-      aprove: "aproved"
+      aprove: "aproved",
     });
     const totalOfPages = numOfPosts / resPerPage;
     res.status(200).send({
       list: foundPosts,
       totalOfPages: totalOfPages,
-      currentPage: page
+      currentPage: page,
     });
   } catch (err) {
     res
@@ -101,7 +101,7 @@ exports.getPending = async (req, res, next) => {
     res.status(200).send({
       pending: foundPosts,
       totalOfPendingPages: totalOfPages,
-      currentPendingPage: page
+      currentPendingPage: page,
     });
   } catch (err) {
     res
@@ -124,7 +124,7 @@ exports.getAll = async (req, res, next) => {
     res.status(200).send({
       allPosts: foundPosts,
       totalOfAllPages: totalOfPages,
-      currentAllPage: page
+      currentAllPage: page,
     });
   } catch (err) {
     res
@@ -138,10 +138,10 @@ exports.getSimilar = async (req, res, next) => {
   try {
     const foundPosts = await Posts.aggregate([
       { $match: { aprove: "aproved" } },
-      { $sample: { size: resPerPage } }
+      { $sample: { size: resPerPage } },
     ]);
     res.status(200).send({
-      similar: foundPosts
+      similar: foundPosts,
     });
   } catch (err) {
     res
@@ -159,7 +159,7 @@ exports.getPersonal = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       "author.id": data.id,
-      $or: [{ aprove: "pending" }, { aprove: "aproved" }]
+      $or: [{ aprove: "pending" }, { aprove: "aproved" }],
     })
       .skip(resPerPage * page - resPerPage)
       .limit(resPerPage)
@@ -169,7 +169,7 @@ exports.getPersonal = async (req, res, next) => {
     res.status(200).send({
       personalPosts: foundPosts,
       totalOfPersonalPages: totalOfPages,
-      currentPersonalPage: page
+      currentPersonalPage: page,
     });
   } catch (err) {
     res
@@ -180,15 +180,15 @@ exports.getPersonal = async (req, res, next) => {
 
 exports.getOne = (req, res, next) => {
   Posts.findOne({ refer: req.params.refer })
-    .then(data => {
+    .then((data) => {
       Posts.findByIdAndUpdate(data.id, { $inc: { views: 1 } })
-        .then(e => res.status(200).send(data))
-        .catch(e => {
+        .then((e) => res.status(200).send(data))
+        .catch((e) => {
           console.log(e);
           res.status(200).send(data);
         });
     })
-    .catch(e => {
+    .catch((e) => {
       res
         .status(400)
         .send({ message: "Falha ao carregar a postagem", data: e });
@@ -200,14 +200,11 @@ exports.getmostViewedsInWeek = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
-      createdAt: {
-        $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
-      }
     })
-      .sort({ views: -1 })
+      .sort({ createdAt: -1, views: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      mostViewedInWeek: foundPosts
+      mostViewedInWeek: foundPosts,
     });
   } catch (err) {
     res
@@ -221,14 +218,11 @@ exports.getmostLikedInWeek = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
-      createdAt: {
-        $gte: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
-      }
     })
-      .sort({ likes: -1 })
+      .sort({ createdAt: -1, likes: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      mostLikedInWeek: foundPosts
+      mostLikedInWeek: foundPosts,
     });
   } catch (err) {
     res
@@ -242,14 +236,11 @@ exports.getHighlights = async (req, res, next) => {
   try {
     const foundPosts = await Posts.find({
       aprove: "aproved",
-      createdAt: {
-        $gte: new Date(new Date() - 3 * 60 * 60 * 24 * 1000)
-      }
     })
-      .sort({ views: -1 })
+      .sort({ createdAt: -1, views: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      highlights: foundPosts
+      highlights: foundPosts,
     });
   } catch (err) {
     res
@@ -262,9 +253,9 @@ exports.post = (req, res, next) => {
   const { title, content, image, categories, tags, id, author } = req.body;
   let tagsRef;
   if (tags) {
-    tagsRef = tags.map(tag => ({
+    tagsRef = tags.map((tag) => ({
       ...tag,
-      value: format.convertToSlug(tag.value)
+      value: format.convertToSlug(tag.value),
     }));
   }
   const refer = format.convertToSlug(title);
@@ -283,13 +274,13 @@ exports.post = (req, res, next) => {
         content,
         image,
         categories,
-        tags: tagsRef
-      }
+        tags: tagsRef,
+      },
     })
-      .then(data => {
+      .then((data) => {
         res.status(201).send({ status: "Success" });
       })
-      .catch(e => {
+      .catch((e) => {
         res.status(400).send({ status: "Error", data: e });
       });
   } else {
@@ -301,14 +292,14 @@ exports.post = (req, res, next) => {
       image,
       categories,
       tags: tagsRef,
-      author
+      author,
     });
     posts
       .save()
-      .then(data => {
+      .then((data) => {
         res.status(201).send({ status: "Success" });
       })
-      .catch(e => {
+      .catch((e) => {
         res.status(400).send({ status: "Error", data: e });
       });
   }
@@ -320,20 +311,20 @@ exports.addCategorie = (req, res, next) => {
   let category = new Categories({ ...categorie, value: value });
   category
     .save()
-    .then(data => {
+    .then((data) => {
       res.status(201).send({ status: "Success" });
     })
-    .catch(e => {
+    .catch((e) => {
       res.status(400).send({ status: "Error", data: e });
     });
 };
 
 exports.getCategories = async (req, res, next) => {
   Categories.find()
-    .then(data => {
+    .then((data) => {
       res.status(200).send(data);
     })
-    .catch(e => {
+    .catch((e) => {
       res.status(400).send({ message: "Falha ao listar os usuarios", data: e });
     });
 };
@@ -345,10 +336,10 @@ exports.postFile = (req, res, next) => {
   let uploadFile = new Upload({ url });
   uploadFile
     .save()
-    .then(data => {
+    .then((data) => {
       res.status(201).send({ status: "Success", uploaded: true, url });
     })
-    .catch(e => {
+    .catch((e) => {
       res.status(400).send({ status: "Error", data: e });
     });
 };
@@ -361,10 +352,10 @@ exports.updateLikes = async (req, res, next) => {
     .then(async ({ likes, _id: id }) => {
       res.status(200).send({
         id,
-        likes
+        likes,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       res.status(400).send({ message: "Falha ao curtir a Postagem", data: e });
     });
 };
@@ -376,10 +367,10 @@ exports.postComment = async (req, res, next) => {
     .then(async ({ _id, comments }) => {
       res.status(200).send({
         _id,
-        comments
+        comments,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       res.status(400).send({ message: "Falha ao comentar", data: e });
     });
 };
@@ -391,18 +382,18 @@ exports.updatePendingPost = async (req, res, next) => {
     id,
     {
       $set: {
-        aprove
-      }
+        aprove,
+      },
     },
     { new: true }
   )
     .then(async ({ aprove, _id: id }) => {
       res.status(200).send({
         id,
-        aprove
+        aprove,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       res
         .status(400)
         .send({ message: "Falha ao aprovar a publicação", data: e });
