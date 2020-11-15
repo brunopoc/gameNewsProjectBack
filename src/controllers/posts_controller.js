@@ -245,9 +245,7 @@ exports.getHighlights = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      highlights: foundPosts.sort((a, b) =>
-        a.likes < b.likes ? (a.likes == b.likes ? 0 : 1) : -1
-      ),
+      highlights: foundPosts,
     });
   } catch (err) {
     res
