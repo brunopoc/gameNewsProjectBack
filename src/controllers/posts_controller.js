@@ -229,12 +229,10 @@ exports.getmostLikedInWeek = async (req, res, next) => {
       ),
     });
   } catch (err) {
-    res
-      .status(400)
-      .send({
-        message: "Falha ao carregar as postagens mais curtidas",
-        data: err,
-      });
+    res.status(400).send({
+      message: "Falha ao carregar as postagens mais curtidas",
+      data: err,
+    });
   }
 };
 
@@ -244,10 +242,12 @@ exports.getHighlights = async (req, res, next) => {
     const foundPosts = await Posts.find({
       aprove: "aproved",
     })
-      .sort({ createdAt: -1, views: -1 })
+      .sort({ createdAt: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      highlights: foundPosts,
+      highlights: foundPosts.sort((a, b) =>
+        a.likes < b.likes ? (a.likes == b.likes ? 0 : 1) : -1
+      ),
     });
   } catch (err) {
     res
