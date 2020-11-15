@@ -332,7 +332,8 @@ exports.getCategories = async (req, res, next) => {
   })
     .select("label value")
     .then((data) => {
-      res.status(200).send(data);
+      //gamb temp, precisa ser adicionada um sistema de position no model e o filtro precisa ser feito por lá
+      res.status(200).send(data.sort((a, b) => (a.value == "outros" ? 1 : -1))); 
     })
     .catch((e) => {
       res
