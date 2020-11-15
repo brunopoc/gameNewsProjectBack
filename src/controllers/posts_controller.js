@@ -201,10 +201,12 @@ exports.getmostViewedsInWeek = async (req, res, next) => {
     const foundPosts = await Posts.find({
       aprove: "aproved",
     })
-      .sort({ createdAt: -1, views: -1 })
+      .sort({ createdAt: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      mostViewedInWeek: foundPosts,
+      mostViewedInWeek: foundPosts.sort((a, b) =>
+        a.views < b.views ? (a.views == b.views ? 0 : 1) : -1
+      ),
     });
   } catch (err) {
     res
@@ -219,15 +221,20 @@ exports.getmostLikedInWeek = async (req, res, next) => {
     const foundPosts = await Posts.find({
       aprove: "aproved",
     })
-      .sort({ createdAt: -1, likes: -1 })
+      .sort({ createdAt: -1 })
       .limit(resPerPage);
     res.status(200).send({
-      mostLikedInWeek: foundPosts,
+      mostLikedInWeek: foundPosts.sort((a, b) =>
+        a.likes < b.likes ? (a.likes == b.likes ? 0 : 1) : -1
+      ),
     });
   } catch (err) {
     res
       .status(400)
-      .send({ message: "Falha ao carregar as postagens", data: err });
+      .send({
+        message: "Falha ao carregar as postagens mais curtidas",
+        data: err,
+      });
   }
 };
 
@@ -320,12 +327,17 @@ exports.addCategorie = (req, res, next) => {
 };
 
 exports.getCategories = async (req, res, next) => {
-  Categories.find()
+  Categories.find({
+    status: "ok",
+  })
+    .select("label value")
     .then((data) => {
       res.status(200).send(data);
     })
     .catch((e) => {
-      res.status(400).send({ message: "Falha ao listar os usuarios", data: e });
+      res
+        .status(400)
+        .send({ message: "Falha ao carregar as categorias", data: e });
     });
 };
 

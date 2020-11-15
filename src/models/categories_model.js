@@ -11,6 +11,11 @@ const schema = new Schema({
         type: String,
         required: true,
         trim: true
+    },
+    status: {
+        type: String,
+        trim: true,
+        default: 'old'
     }
 });
 
